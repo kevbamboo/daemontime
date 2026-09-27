@@ -119,8 +119,8 @@ body.light-theme {
 .light-theme #game,
 .light-theme #login-page,
 .light-theme #signup-page {
-  --panel-line: #292929;
-  --input-line: #333333;
+  --panel-line: #000000;
+  --input-line: #000000;
   background: #f3ead2;
   color: #000000;
 }
@@ -334,6 +334,16 @@ body.light-theme {
 .light-theme .signup-login a,
 .light-theme .game-card-back-title {
   color: #000000;
+}
+
+.light-theme #login-form > button[type="submit"]:hover:not(:disabled),
+.light-theme #signup-form > button[type="submit"]:hover:not(:disabled) {
+  box-shadow: 0 0 14px #ffffff;
+}
+
+.dark-theme #login-form > button[type="submit"]:hover:not(:disabled),
+.dark-theme #signup-form > button[type="submit"]:hover:not(:disabled) {
+  box-shadow: 0 0 14px #ffffff35;
 }
 
 .light-theme .answer-choice {

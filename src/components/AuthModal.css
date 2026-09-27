@@ -20,7 +20,7 @@
   padding: 42px;
 
   background: #111111;
-  border: 1px solid #292929;
+  border: 1px solid var(--surface-line, #626262);
   border-radius: 4px;
 
   text-align: center;
@@ -80,7 +80,7 @@
 }
 
 .secondary-button {
-  border: 1px solid #333333;
+  border: 1px solid var(--surface-line, #626262);
   background: #0a0a0a;
   color: #dddddd;
 }
@@ -93,6 +93,42 @@
 
 .auth-options button:active {
   transform: translateY(1px);
+}
+
+.auth-options button:hover:not(:disabled) {
+  box-shadow: 0 0 14px #ffffff35;
+}
+
+.light-theme .modal-backdrop {
+  background: #f3ead2;
+}
+
+.light-theme .modal-card {
+  background: var(--surface-background);
+  border-color: var(--surface-line);
+}
+
+.light-theme .secondary-button {
+  background: var(--surface-background);
+  color: var(--text-primary);
+  border-color: var(--surface-line);
+}
+
+.light-theme .secondary-button:hover {
+  background: #f2f2f2;
+  border-color: var(--surface-line);
+  color: var(--text-primary);
+  box-shadow: 0 0 14px #ffffff;
+}
+
+.light-theme .guest-button {
+  background: var(--accent);
+  color: var(--text-primary);
+}
+
+.light-theme .guest-button:hover:not(:disabled) {
+  background: var(--accent-hover);
+  box-shadow: 0 0 14px #ffffff;
 }
 .modal-mark {
   width: 42px;
