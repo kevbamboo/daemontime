@@ -139,6 +139,8 @@ class SocketService {
   }
   async retryConnection() {
     if (!this.socket) throw new Error("Sign in before connecting");
+    this.error = "";
+    this.notifyStatus();
     if (!this.socket.connected) {
       this.socket.connect();
       return;

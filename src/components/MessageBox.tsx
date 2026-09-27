@@ -106,6 +106,7 @@ export default function MessageBox({ gameState }: { gameState: number }) {
       {error && <p role="alert">{error}</p>}
       <form
         id="message-form"
+        autoComplete="off"
         className={warning ? "message-form-warning" : ""}
         onSubmit={handleSubmit}
         onAnimationEnd={() => setWarning(false)}
@@ -113,6 +114,7 @@ export default function MessageBox({ gameState }: { gameState: number }) {
         <input
           id="message-input"
           name="chat"
+          autoComplete="off"
           aria-label={gameState === 0 ? "Lobby message" : "Game message"}
           type="text"
           placeholder="Say something..."

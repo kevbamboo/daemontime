@@ -108,6 +108,7 @@ function Question({
   }
   return (
     <form
+      autoComplete="off"
       onSubmit={(event) => {
         event.preventDefault();
         void submit();

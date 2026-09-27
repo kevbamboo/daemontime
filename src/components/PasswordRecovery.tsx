@@ -51,13 +51,13 @@ export default function PasswordRecovery({ mode, authenticated }: {
         {!canSubmit && <p role="alert">Open the reset link from your email. If it has expired, <Link to="/forgot-password">request a new link</Link>.</p>}
         {notice && <p role={complete ? "status" : "alert"}>{notice}</p>}
         {canSubmit && !complete && (
-          <form id="login-form" onSubmit={submit}>
+          <form id="login-form" autoComplete="off" onSubmit={submit}>
             <div className={`input-container${updating ? " password-container" : ""}`}>
               <input
                 id="recovery-value"
                 name={updating ? "password" : "email"}
                 type={updating ? (visible ? "text" : "password") : "email"}
-                autoComplete={updating ? "new-password" : "email"}
+                autoComplete="off"
                 minLength={updating ? 6 : undefined}
                 placeholder=" "
                 required

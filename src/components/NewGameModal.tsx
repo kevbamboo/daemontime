@@ -54,7 +54,7 @@ export default function NewGameModal({ onClose }: { onClose: () => void }) {
       }}
     >
       <h2 id="new-game-title">Host a Game</h2>
-      <form onSubmit={submit}>
+      <form autoComplete="off" onSubmit={submit}>
         <label htmlFor="new-game-questions">Number of questions</label>
         <input
           id="new-game-questions"

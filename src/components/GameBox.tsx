@@ -29,9 +29,11 @@ function ConnectionStatus({ busy, onRetry }: { busy: boolean; onRetry: () => voi
   }, []);
   return (
     <div className="connection-overlay">
-      <p role="status" aria-label="Connecting">
-        Connecting<span className="connecting-dots" aria-hidden="true" />
-      </p>
+      {!socketService.error && (
+        <p role="status" aria-label="Connecting">
+          Connecting<span className="connecting-dots" aria-hidden="true" />
+        </p>
+      )}
       {socketService.error && <p role="alert">{socketService.error}</p>}
       {canRetry && <button disabled={busy} onClick={onRetry}>Retry</button>}
     </div>

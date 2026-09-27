@@ -53,13 +53,13 @@ export default function Login() {
         </div>
 
         {notice && <p role="alert">{notice}</p>}
-        <form id="login-form" onSubmit={handleLogin}>
+        <form id="login-form" autoComplete="off" onSubmit={handleLogin}>
           <div className="input-container">
             <input
               type="email"
               id="email"
               name="email"
-              autoComplete="email"
+              autoComplete="off"
               placeholder=" "
               required
             />
@@ -71,7 +71,7 @@ export default function Login() {
               type={showPassword ? "text" : "password"}
               id="password"
               name="password"
-              autoComplete="current-password"
+              autoComplete="off"
               placeholder=" "
               required
             />

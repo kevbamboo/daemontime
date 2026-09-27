@@ -53,7 +53,7 @@ export default function Signup() {
 
   return (
     <div id="signup-page">
-      <form id="signup-form" onSubmit={handleSignup}>
+      <form id="signup-form" autoComplete="off" onSubmit={handleSignup}>
         <div className="signup-header">
           <div className="auth-heading">
             <h1>Create your account</h1>
@@ -68,7 +68,7 @@ export default function Signup() {
             type="email"
             id="email"
             name="email"
-            autoComplete="email"
+            autoComplete="off"
             placeholder=" "
             required
           />
@@ -80,7 +80,7 @@ export default function Signup() {
             type="text"
             id="username"
             name="username"
-            autoComplete="username"
+            autoComplete="off"
             placeholder=" "
             required
           />
@@ -92,7 +92,7 @@ export default function Signup() {
             type={showPassword ? "text" : "password"}
             id="password"
             name="password"
-            autoComplete="new-password"
+            autoComplete="off"
             minLength={6}
             placeholder=" "
             required

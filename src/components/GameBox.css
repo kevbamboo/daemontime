@@ -43,8 +43,6 @@
 
 .connecting-dots {
   display: inline-block;
-  width: 3ch;
-  text-align: left;
 }
 
 .connecting-dots::after {
