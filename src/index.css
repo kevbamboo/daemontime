@@ -98,6 +98,11 @@ body.light-theme {
   background: #1a1a1a !important;
   color: #e63946;
 }
+
+.light-theme .password-toggle:hover {
+  background: transparent !important;
+  color: #000000;
+}
 .password-toggle.is-bouncing {
   animation: password-toggle-bounce 0.5s ease;
 }
@@ -202,6 +207,26 @@ body.light-theme {
   background: #fffaf0;
 }
 
+.light-theme .input-container input:focus + label,
+.light-theme .input-container input:not(:placeholder-shown) + label {
+  color: #000000;
+}
+
+.light-theme .players-section h3,
+.light-theme #messages p span {
+  color: #000000;
+}
+
+.light-theme .leave-button:hover:not(:disabled):not(.leave-highlight) {
+  color: #000000;
+  background: #e8dfc8;
+  box-shadow: 0 0 10px #00000022;
+}
+
+.light-theme .explanation-toggle input:focus-visible + .switch-track {
+  outline-color: #000000;
+}
+
 .light-theme .secondary-button {
   background: #fffaf0;
   color: #000000;
@@ -276,10 +301,8 @@ body.light-theme {
   border-color: #81edf7;
 }
 
-.light-theme .theme-toggle input:focus-visible + .theme-slider,
-.light-theme .input-container input:focus + label {
-  outline-color: #81edf7;
-  color: #81edf7;
+.light-theme .theme-toggle input:focus-visible + .theme-slider {
+  outline-color: #000000;
 }
 
 .light-theme .new-game-button,
@@ -336,6 +359,13 @@ body.light-theme {
   color: #000000;
 }
 
+.light-theme .signup-prompt a:hover,
+.light-theme .signup-login a:hover {
+  background: #81edf7;
+  border-color: #000000;
+  color: #000000;
+}
+
 .light-theme #login-form > button[type="submit"]:hover:not(:disabled),
 .light-theme #signup-form > button[type="submit"]:hover:not(:disabled) {
   box-shadow: 0 0 14px #ffffff;
@@ -382,4 +412,28 @@ body.light-theme {
   .theme-slider::after {
     transition: none;
   }
+}
+
+button:disabled { cursor: not-allowed; }
+
+.auth-options button:disabled,
+#login-form > button:disabled,
+#signup-form > button:disabled { opacity: 0.6; }
+
+.app-shell a:focus-visible,
+.app-shell button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
+.app-shell #login-page, .app-shell #signup-page {
+  box-sizing: border-box;
+  min-height: 100dvh;
+  padding-top: 64px;
+}
+
+@media (max-width: 500px) {
+  .app-shell .login-card, .app-shell #signup-form, .app-shell .modal-card { padding: 24px; }
+  .app-shell .login-header, .app-shell .signup-header { gap: 12px; }
+  .app-shell .login-header h1, .app-shell .signup-header h1 { font-size: 25px; }
 }

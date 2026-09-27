@@ -9,12 +9,13 @@
 }
 
 .login-card {
+  box-sizing: border-box;
   width: 100%;
   max-width: 380px;
   padding: 42px;
 
   background: #111111;
-  border: 1px solid #292929;
+  border: 1px solid var(--surface-line, #626262);
   border-radius: 4px;
 }
 
@@ -100,12 +101,20 @@
 
 .forgot-password a,
 .signup-prompt a {
+  display: inline-block;
+  padding: 4px 8px;
+  border: 1px solid transparent;
+  border-radius: 3px;
   color: #e63946;
   text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .forgot-password a:hover,
 .signup-prompt a:hover {
+  background: #e6394620;
+  border-color: #e6394680;
   text-decoration: underline;
 }
 

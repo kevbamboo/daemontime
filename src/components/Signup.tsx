@@ -8,9 +8,12 @@ export default function Signup() {
   const navigate = useNavigate();
   const [notice, setNotice] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [busy, setBusy] = useState(false);
 
   async function handleSignup(e: SubmitEvent) {
     e.preventDefault();
+    if (busy) return;
+    setNotice("");
 
     const form = e.currentTarget as HTMLFormElement;
 
@@ -21,8 +24,13 @@ export default function Signup() {
     const password = (form.elements.namedItem("password") as HTMLInputElement)
       .value;
 
+    if (!username.trim()) {
+      setNotice("Enter a username.");
+      return;
+    }
+    setBusy(true);
     try {
-      const { data, error } = await signup(email, username, password);
+      const { data, error } = await signup(email.trim(), username.trim(), password);
 
       if (error) {
         setNotice(error.message);
@@ -38,12 +46,13 @@ export default function Signup() {
       setNotice(
         err instanceof Error ? err.message : "Unable to sign up. Please retry.",
       );
+    } finally {
+      setBusy(false);
     }
   }
 
   return (
     <div id="signup-page">
-      {notice && <p role="status">{notice}</p>}
       <form id="signup-form" onSubmit={handleSignup}>
         <div className="signup-header">
           <div className="auth-heading">
@@ -53,11 +62,13 @@ export default function Signup() {
           <div className="logo-mark">DT</div>
         </div>
 
+        {notice && <p role="status">{notice}</p>}
         <div className="input-container">
           <input
             type="email"
             id="email"
             name="email"
+            autoComplete="email"
             placeholder=" "
             required
           />
@@ -69,6 +80,7 @@ export default function Signup() {
             type="text"
             id="username"
             name="username"
+            autoComplete="username"
             placeholder=" "
             required
           />
@@ -80,6 +92,8 @@ export default function Signup() {
             type={showPassword ? "text" : "password"}
             id="password"
             name="password"
+            autoComplete="new-password"
+            minLength={6}
             placeholder=" "
             required
           />
@@ -91,7 +105,7 @@ export default function Signup() {
           />
         </div>
 
-        <button type="submit">Sign up</button>
+        <button type="submit" disabled={busy}>{busy ? "Signing up..." : "Sign up"}</button>
 
         <div className="signup-login">
           Already have an account? <Link to="/login">Log in</Link>

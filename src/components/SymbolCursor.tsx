@@ -8,7 +8,7 @@ const SYMBOL_CURSOR_SETTINGS = {
   changeIntervalMs: 50,
   trailDurationMs: 450,
   fallDistancePx: 28,
-  nativeCursorSelector: 'button, [role="button"], input, textarea, select, [role="slider"], [role="switch"], [role="textbox"], [contenteditable="true"], .theme-toggle, .game-card, .answer-choice',
+  nativeCursorSelector: 'a[href], button, [role="button"], input, textarea, select, [role="slider"], [role="switch"], [role="textbox"], [contenteditable="true"], .theme-toggle, .game-card, .answer-choice',
 };
 
 export default function SymbolCursor() {

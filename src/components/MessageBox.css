@@ -1,5 +1,6 @@
 #message-box {
   min-width: 0;
+  min-height: 0;
   height: 600px;
 
   display: flex;
@@ -20,6 +21,8 @@
 
 #messages {
   flex: 1;
+  min-height: 0;
+  overflow-wrap: anywhere;
 
   padding: 16px;
 
@@ -50,6 +53,7 @@
 
 #message-form {
   display: flex;
+  flex-shrink: 0;
   gap: 8px;
 
   padding: 12px;

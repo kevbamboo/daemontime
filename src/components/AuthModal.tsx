@@ -9,6 +9,8 @@ export default function AuthModal() {
   const [busy, setBusy] = useState(false);
 
   async function handleGuestLogin() {
+    if (busy) return;
+    setError("");
     setBusy(true);
     try {
       const result = await guestLogin();

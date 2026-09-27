@@ -21,11 +21,27 @@ import {
 } from "../services/socket.service";
 import "./GameBox.css";
 
+function ConnectionStatus({ busy, onRetry }: { busy: boolean; onRetry: () => void }) {
+  const [canRetry, setCanRetry] = useState(false);
+  useEffect(() => {
+    const timeout = window.setTimeout(() => setCanRetry(true), 5000);
+    return () => window.clearTimeout(timeout);
+  }, []);
+  return (
+    <div className="connection-overlay">
+      <p role="status" aria-label="Connecting">
+        Connecting<span className="connecting-dots" aria-hidden="true" />
+      </p>
+      {socketService.error && <p role="alert">{socketService.error}</p>}
+      {canRetry && <button disabled={busy} onClick={onRetry}>Retry</button>}
+    </div>
+  );
+}
+
 export default function GameBox() {
   const newGameButtonRef = useRef<HTMLButtonElement>(null);
   const [games, setGames] = useState<Game[]>([]);
   const [gameUpdate, setGameUpdate] = useState<GameUpdate | null>(null);
-  const [showConnectionFallback, setShowConnectionFallback] = useState(false);
   const [, redraw] = useState(0);
   const [busy, setBusy] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -33,18 +49,6 @@ export default function GameBox() {
     "lobby",
   );
   const [, redrawUsers] = useState(0);
-  useEffect(() => {
-    if (socketService.ready) {
-      setShowConnectionFallback(false);
-      return;
-    }
-
-    const timeout = window.setTimeout(() => {
-      setShowConnectionFallback(true);
-    }, 5000);
-
-    return () => window.clearTimeout(timeout);
-  }, [socketService.ready]);
   useEffect(() => {
     let previousGameId: string | undefined;
     const gamesOff = socketService.subscribeToGames((nextGames) => {
@@ -80,6 +84,7 @@ export default function GameBox() {
   const selectedTab = activeTab === "game" && !hasGameTab ? "lobby" : activeTab;
   const gameEnded = isFinished(gameUpdate);
   async function action(fn: () => Promise<unknown>) {
+    if (busy) return;
     setBusy(true);
     try {
       await fn();
@@ -92,20 +97,14 @@ export default function GameBox() {
   return (
     <div id="game">
       <h1 className="game-title">Daemon Time</h1>
-      {socketService.error && showConnectionFallback && (
+      {socketService.ready && socketService.error && (
         <p role="alert">{socketService.error}</p>
       )}
       {!socketService.ready ? (
-        showConnectionFallback ? (
-          <div className="connection-overlay">
-            Connecting…{" "}
-            <button
-              onClick={() => void action(() => socketService.retryConnection())}
-            >
-              Retry
-            </button>
-          </div>
-        ) : null
+        <ConnectionStatus
+          busy={busy}
+          onRetry={() => void action(() => socketService.retryConnection())}
+        />
       ) : (
         <>
           <div id="game-box">
@@ -203,6 +202,20 @@ export default function GameBox() {
               className="chat-tabs"
               role="tablist"
               aria-label="Lobby sidebar"
+              onKeyDown={(event) => {
+                const tabs = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+                const index = tabs.indexOf(event.target as HTMLButtonElement);
+                if (index < 0) return;
+                let next: number;
+                if (event.key === "ArrowRight") next = (index + 1) % tabs.length;
+                else if (event.key === "ArrowLeft") next = (index + tabs.length - 1) % tabs.length;
+                else if (event.key === "Home") next = 0;
+                else if (event.key === "End") next = tabs.length - 1;
+                else return;
+                event.preventDefault();
+                tabs[next].focus();
+                tabs[next].click();
+              }}
               style={
                 {
                   "--tab-index":
@@ -218,6 +231,9 @@ export default function GameBox() {
               <button
                 className={selectedTab === "users" ? "active" : ""}
                 role="tab"
+                id="users-tab"
+                aria-controls="sidebar-panel"
+                tabIndex={selectedTab === "users" ? 0 : -1}
                 aria-selected={selectedTab === "users"}
                 onClick={() => setActiveTab("users")}
               >
@@ -226,6 +242,9 @@ export default function GameBox() {
               <button
                 className={selectedTab === "lobby" ? "active" : ""}
                 role="tab"
+                id="lobby-tab"
+                aria-controls="sidebar-panel"
+                tabIndex={selectedTab === "lobby" ? 0 : -1}
                 aria-selected={selectedTab === "lobby"}
                 onClick={() => setActiveTab("lobby")}
               >
@@ -235,6 +254,9 @@ export default function GameBox() {
                 <button
                   className={selectedTab === "game" ? "active" : ""}
                   role="tab"
+                  id="game-tab"
+                  aria-controls="sidebar-panel"
+                  tabIndex={selectedTab === "game" ? 0 : -1}
                   aria-selected={selectedTab === "game"}
                   onClick={() => setActiveTab("game")}
                 >
@@ -242,8 +264,9 @@ export default function GameBox() {
                 </button>
               )}
             </div>
+            <div id="sidebar-panel" className="sidebar-panel" role="tabpanel" aria-labelledby={`${selectedTab}-tab`}>
             {selectedTab === "users" ? (
-              <div className="online-users" role="tabpanel">
+              <div className="online-users">
                 <ul>
                   {socketService.onlineUsers.map((user) => (
                     <li key={user.id}>
@@ -257,6 +280,7 @@ export default function GameBox() {
             ) : (
               <MessageBox gameState={selectedTab === "game" ? 1 : 0} />
             )}
+            </div>
           </aside>
         </>
       )}

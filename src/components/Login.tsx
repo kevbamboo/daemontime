@@ -8,9 +8,13 @@ export default function Login() {
   const navigate = useNavigate();
   const [notice, setNotice] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [busy, setBusy] = useState(false);
 
   async function handleLogin(e: SubmitEvent) {
     e.preventDefault();
+    if (busy) return;
+    setBusy(true);
+    setNotice("");
 
     const form = e.currentTarget as HTMLFormElement;
 
@@ -20,7 +24,7 @@ export default function Login() {
       .value;
 
     try {
-      const { error } = await login(email, password);
+      const { error } = await login(email.trim(), password);
 
       if (error) {
         setNotice(error.message);
@@ -32,6 +36,8 @@ export default function Login() {
       setNotice(
         err instanceof Error ? err.message : "Unable to log in. Please retry.",
       );
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -53,6 +59,7 @@ export default function Login() {
               type="email"
               id="email"
               name="email"
+              autoComplete="email"
               placeholder=" "
               required
             />
@@ -64,6 +71,7 @@ export default function Login() {
               type={showPassword ? "text" : "password"}
               id="password"
               name="password"
+              autoComplete="current-password"
               placeholder=" "
               required
             />
@@ -76,10 +84,10 @@ export default function Login() {
           </div>
 
           <div className="forgot-password">
-            <a href="#">Forgot password?</a>
+            <Link to="/forgot-password">Forgot password?</Link>
           </div>
 
-          <button type="submit">Log in</button>
+          <button type="submit" disabled={busy}>{busy ? "Logging in..." : "Log in"}</button>
         </form>
 
         <div className="signup-prompt">
@@ -89,5 +97,3 @@ export default function Login() {
     </main>
   );
 }
-
-// supabase has reset password

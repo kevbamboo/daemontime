@@ -91,13 +91,15 @@ function Question({
 }) {
   const [choice, setChoice] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
   async function submit() {
-    if (choice === null || busy) return;
+    if (choice === null || busy || submitted) return;
     setBusy(true);
     setError("");
     try {
       await socketService.submitAnswer(gameId, question.index, choice);
+      setSubmitted(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to submit answer.");
     } finally {
@@ -111,7 +113,7 @@ function Question({
         void submit();
       }}
     >
-      <fieldset className="question-choices" disabled={busy}>
+      <fieldset className="question-choices" disabled={busy || submitted}>
         <legend className="question-text">{question.text}</legend>
         {question.choices.map((text, index) => (
           <label
@@ -135,9 +137,9 @@ function Question({
       {error && <p role="alert">{error}</p>}
       <button
         className="game-primary-button"
-        disabled={choice === null || busy}
+        disabled={choice === null || busy || submitted}
       >
-        {busy ? "Submitting..." : "Submit answer"}
+        {submitted ? "Answer submitted" : busy ? "Submitting..." : "Submit answer"}
       </button>
     </form>
   );

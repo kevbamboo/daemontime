@@ -105,7 +105,9 @@ class SocketService {
       },
     );
     socket.on("connect", () => {
-      void this.joinLobby().catch((error) => this.reportError(error));
+      void this.joinLobby().catch((error) => {
+        if (this.socket === socket) this.reportError(error);
+      });
     });
     socket.on("disconnect", () => {
       this.ready = false;

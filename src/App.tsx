@@ -1,5 +1,5 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { lazy, Suspense, useEffect, useState } from "react";
 import "./App.css";
 import Home from "./components/Home";
 import Login from "./components/Login";
@@ -7,6 +7,8 @@ import Signup from "./components/Signup";
 import ThemeToggle from "./components/ThemeToggle";
 import { supabase } from "./lib/supabase";
 import { socketService } from "./services/socket.service";
+
+const PasswordRecovery = lazy(() => import("./components/PasswordRecovery"));
 
 export default function App() {
   const [authenticated, setAuthenticated] = useState(false);
@@ -43,12 +45,16 @@ export default function App() {
     <BrowserRouter>
       <div className={`${dark ? "dark-theme" : "light-theme"} app-shell${changingTheme ? " theme-changing" : ""}`}>
         <ThemeToggle dark={dark} onChange={changeTheme} />
+        <Suspense fallback={<p role="status">Loading page...</p>}>
         <Routes>
           <Route path="/" element={<Home authenticated={authenticated} />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="*" element={<p>Page not found.</p>} />
+          <Route path="/forgot-password" element={<PasswordRecovery key="request" mode="request" authenticated={authenticated} />} />
+          <Route path="/reset-password" element={<PasswordRecovery key="update" mode="update" authenticated={authenticated} />} />
+          <Route path="*" element={<p>Page not found. <Link to="/">Return home</Link></p>} />
         </Routes>
+        </Suspense>
       </div>
     </BrowserRouter>
   );
