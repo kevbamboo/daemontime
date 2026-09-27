@@ -86,10 +86,9 @@
 }
 
 .light-theme .theme-toggle {
-  padding: 5px 8px;
-  border-radius: 4px;
-  background: #111111;
-  color: #f5f5f5;
+  padding: 0;
+  background: transparent;
+  color: #000000;
 }
 
 .light-theme .theme-slider {

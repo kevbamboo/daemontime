@@ -114,11 +114,11 @@
   border-color: var(--surface-line);
 }
 
-.light-theme .secondary-button:hover {
-  background: #f2f2f2;
+.app-shell.light-theme .auth-options .secondary-button:hover:not(:disabled) {
+  background: #e8dfc8;
   border-color: var(--surface-line);
   color: var(--text-primary);
-  box-shadow: 0 0 14px #ffffff;
+  box-shadow: 0 0 14px #00000030;
 }
 
 .light-theme .guest-button {
@@ -126,9 +126,9 @@
   color: var(--text-primary);
 }
 
-.light-theme .guest-button:hover:not(:disabled) {
+.app-shell.light-theme .auth-options .guest-button:hover:not(:disabled) {
   background: var(--accent-hover);
-  box-shadow: 0 0 14px #ffffff;
+  box-shadow: 0 0 14px #00000030;
 }
 .modal-mark {
   width: 42px;
