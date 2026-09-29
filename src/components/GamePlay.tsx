@@ -35,6 +35,22 @@ function Scoreboard({ update }: { update: GameUpdate }) {
   function getStatus(player: GameUpdate['scores'][number]) {
     if (!player.active) return 'Left';
     if (update.phase === 'finished') return 'Finished';
+    if (
+      player.id === socketService.userId &&
+      player.submitted &&
+      update.yourAnswerPoints !== undefined
+    ) {
+      const points = update.yourAnswerPoints;
+      return points > 0 ? (
+        <span className="answer-result answer-result-correct" aria-label={`Correct, gained ${points} ${points === 1 ? "point" : "points"}`}>
+          <span aria-hidden="true">✓</span> (+{points})
+        </span>
+      ) : (
+        <span className="answer-result answer-result-incorrect" aria-label="Incorrect">
+          <span aria-hidden="true">✗</span>
+        </span>
+      );
+    }
     if (player.submitted) return 'Submitted';
     if (update.phase === 'scoreboard') return 'No answer';
     return 'Answering';
@@ -72,14 +88,8 @@ function Scoreboard({ update }: { update: GameUpdate }) {
 }
 
 function StatusMessage({ update }: { update: GameUpdate }) {
-  if (update.phase === 'finished') return null;
-  if (update.phase !== 'scoreboard') {
-    return <p role="status">Answer submitted. Waiting for the other players or the timer.</p>;
-  }
-  const message = update.questionIndex + 1 === update.totalQuestions
-    ? 'Final results in...'
-    : 'Next question in...';
-  return <p role="status">{message}</p>;
+  if (update.phase !== 'question') return null;
+  return <p role="status">Answer submitted. Waiting for the other players or the timer.</p>;
 }
 
 function Question({
@@ -278,7 +288,18 @@ export default function GamePlay({ update }: { update: GameUpdate | null }) {
         {update.phase !== "finished" && (
           <h3>{`Question ${update.questionIndex + 1} of ${update.totalQuestions}`}</h3>
         )}
-        {update.endsAt !== null && <Timer update={update} />}
+        {update.endsAt !== null && (
+          <div className="round-timer">
+            {update.phase === "scoreboard" && (
+              <span role="status">
+                {update.questionIndex + 1 === update.totalQuestions
+                  ? "Final results in…"
+                  : "Next question in…"}
+              </span>
+            )}
+            <Timer update={update} />
+          </div>
+        )}
       </div>
       {showScores ? (
         <>

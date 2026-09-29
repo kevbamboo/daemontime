@@ -19,12 +19,33 @@
   font-variant-numeric: tabular-nums;
   color: #f5f5f5;
 }
+.round-header {
+  flex-wrap: wrap;
+}
+.round-timer {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-left: auto;
+  white-space: nowrap;
+}
+.round-timer .game-timer {
+  min-width: 2ch;
+  text-align: center;
+}
 .game-countdown {
   text-align: center;
   padding-top: 48px;
 }
 .game-countdown .game-timer {
+  display: grid;
+  place-items: center;
+  width: 1.5em;
+  height: 1.5em;
+  margin-inline: auto;
   font-size: 72px;
+  line-height: 1;
+  letter-spacing: 0;
   color: #e63946;
 }
 .light-theme .game-countdown .game-timer {
@@ -104,7 +125,16 @@
   border-bottom: 1px solid #333;
 }
 .your-score {
-  background: #25171a;
+  background: #2b2b2b;
+}
+.answer-result {
+  font-weight: 700;
+}
+.answer-result-correct {
+  color: #6dcf98;
+}
+.answer-result-incorrect {
+  color: #ff6975;
 }
 .question-review {
   border-top: 1px solid #444;

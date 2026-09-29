@@ -36,6 +36,7 @@ export type GameUpdate = {
   submitted: boolean;
   yourAnswer: number | null;
   scores: (Player & { score: number; submitted: boolean; active: boolean })[];
+  yourAnswerPoints?: number;
   question?: GameQuestion;
   review?: ReviewQuestion[];
   message?: string;
@@ -93,7 +94,9 @@ class SocketService {
       return;
     }
     const socket = io(
-      import.meta.env.VITE_SOCKET_URL || window.location.origin,
+      import.meta.env.DEV
+        ? "http://localhost:3000"
+        : import.meta.env.VITE_SOCKET_URL || window.location.origin,
       { auth: { token }, autoConnect: false },
     );
     this.socket = socket;

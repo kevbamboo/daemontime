@@ -245,7 +245,15 @@ body.light-theme {
 }
 
 .light-theme .your-score {
-  background: #e8fbfd;
+  background: #f2f2f2;
+}
+
+.light-theme .answer-result-correct {
+  color: #16a34a;
+}
+
+.light-theme .answer-result-incorrect {
+  color: #ef4444;
 }
 
 .light-theme .new-game-modal {
