@@ -35,8 +35,12 @@ export type GameUpdate = {
   totalQuestions: number;
   submitted: boolean;
   yourAnswer: number | null;
-  scores: (Player & { score: number; submitted: boolean; active: boolean })[];
-  yourAnswerPoints?: number;
+  scores: (Player & {
+    score: number;
+    submitted: boolean;
+    active: boolean;
+    answerPoints?: number;
+  })[];
   question?: GameQuestion;
   review?: ReviewQuestion[];
   message?: string;

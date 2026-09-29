@@ -35,12 +35,8 @@ function Scoreboard({ update }: { update: GameUpdate }) {
   function getStatus(player: GameUpdate['scores'][number]) {
     if (!player.active) return 'Left';
     if (update.phase === 'finished') return 'Finished';
-    if (
-      player.id === socketService.userId &&
-      player.submitted &&
-      update.yourAnswerPoints !== undefined
-    ) {
-      const points = update.yourAnswerPoints;
+    if (player.submitted && player.answerPoints !== undefined) {
+      const points = player.answerPoints;
       return points > 0 ? (
         <span className="answer-result answer-result-correct" aria-label={`Correct, gained ${points} ${points === 1 ? "point" : "points"}`}>
           <span aria-hidden="true">✓</span> (+{points})
