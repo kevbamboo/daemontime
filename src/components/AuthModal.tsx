@@ -1,26 +1,11 @@
 import { useState } from "react";
 import "./AuthModal.css";
-import { guestLogin } from "../services/auth.service";
+import GuestLoginButton from "./GuestLoginButton";
 import { useNavigate } from "react-router-dom";
 
 export default function AuthModal() {
   const navigate = useNavigate();
-  const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-
-  async function handleGuestLogin() {
-    if (busy) return;
-    setError("");
-    setBusy(true);
-    try {
-      const result = await guestLogin();
-      setError(result.error?.message ?? "");
-    } catch {
-      setError("Unable to sign in. Please retry.");
-    } finally {
-      setBusy(false);
-    }
-  }
 
   return (
     <div className="modal-backdrop">
@@ -31,18 +16,12 @@ export default function AuthModal() {
 
         <p>Choose how you'd like to continue.</p>
 
-        {error && <p role="alert">{error}</p>}
         <div className="auth-options">
-          <button
-            className="guest-button"
-            onClick={handleGuestLogin}
-            disabled={busy}
-          >
-            Continue as Guest
-          </button>
+          <GuestLoginButton onBusyChange={setBusy} />
 
           <button
             className="secondary-button"
+            disabled={busy}
             onClick={() => navigate("/login")}
           >
             Log in
@@ -50,6 +29,7 @@ export default function AuthModal() {
 
           <button
             className="secondary-button"
+            disabled={busy}
             onClick={() => navigate("/signup")}
           >
             Create an account

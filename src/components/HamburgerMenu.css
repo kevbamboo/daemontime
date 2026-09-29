@@ -1,0 +1,119 @@
+.hamburger {
+  position: fixed;
+  top: 16px;
+  right: 20px;
+  z-index: 1100;
+}
+
+.hamburger,
+.hamburger-menu-close {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 6px;
+  border: 1px solid var(--surface-line);
+  border-radius: 4px;
+  background: var(--surface-background);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.hamburger {
+  border: none;
+  background: transparent;
+}
+
+.hamburger svg,
+.hamburger-menu-close svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.hamburger-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  background: rgb(0 0 0 / 15%);
+  backdrop-filter: blur(2px);
+  pointer-events: none;
+}
+
+.hamburger-menu {
+  position: fixed;
+  z-index: 1101;
+  inset: 0 0 0 auto;
+  box-sizing: border-box;
+  width: clamp(15rem, 20vw, 18rem);
+  height: 100dvh;
+  max-width: calc(100vw - 2rem);
+  max-height: 100dvh;
+  margin: 0;
+  padding: 16px 20px max(24px, env(safe-area-inset-bottom));
+  border: 0;
+  border-left: 1px solid var(--surface-line);
+  background: var(--surface-background);
+  color: var(--text-primary);
+  overflow-y: auto;
+}
+
+.hamburger-menu[open] {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.hamburger-menu-header,
+.hamburger-menu-theme {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.hamburger-menu-header h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.hamburger-menu-theme {
+  font-size: 14px;
+}
+
+.hamburger-menu-footer {
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 1px solid var(--surface-line);
+}
+
+.hamburger-menu-footer p {
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.logout-button {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--surface-line);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.logout-button:hover:not(:disabled) {
+  background: var(--page-background);
+}
+
+.logout-button:disabled {
+  opacity: 0.6;
+}
+
+html.symbol-cursor-active dialog.hamburger-menu,
+html.symbol-cursor-active dialog.hamburger-menu * {
+  cursor: auto !important;
+}

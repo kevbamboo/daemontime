@@ -1,0 +1,56 @@
+.guest-button {
+  width: 100%;
+  height: 50px;
+  border: none;
+  border-radius: 3px;
+  background: var(--accent, #e63946);
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.guest-button:hover:not(:disabled) {
+  background: var(--accent-hover, #c92f3b);
+}
+
+.guest-button:disabled,
+.guest-login-link:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.light-theme .guest-button {
+  color: var(--text-primary);
+}
+
+.login-card > .guest-login,
+#signup-form > .guest-login {
+  margin-top: 12px;
+  text-align: center;
+}
+
+.guest-login-link {
+  padding: 4px 8px;
+  border: none;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--accent, #e63946);
+  font-size: 14px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.guest-login-link:hover:not(:disabled) {
+  color: var(--accent-hover, #c92f3b);
+}
+
+.light-theme .guest-login-link {
+  color: var(--text-primary);
+}
+
+.light-theme .guest-login-link:hover:not(:disabled) {
+  background: var(--accent);
+}

@@ -3,16 +3,18 @@ import { Link, useNavigate } from "react-router-dom";
 import { signup } from "../services/auth.service";
 import "./Signup.css";
 import PasswordToggle from "./PasswordToggle";
+import GuestLoginButton from "./GuestLoginButton";
 
 export default function Signup() {
   const navigate = useNavigate();
   const [notice, setNotice] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [guestBusy, setGuestBusy] = useState(false);
 
   async function handleSignup(e: SubmitEvent) {
     e.preventDefault();
-    if (busy) return;
+    if (busy || guestBusy) return;
     setNotice("");
 
     const form = e.currentTarget as HTMLFormElement;
@@ -105,11 +107,12 @@ export default function Signup() {
           />
         </div>
 
-        <button type="submit" disabled={busy}>{busy ? "Signing up..." : "Sign up"}</button>
+        <button type="submit" disabled={busy || guestBusy}>{busy ? "Signing up..." : "Sign up"}</button>
 
         <div className="signup-login">
           Already have an account? <Link to="/login">Log in</Link>
         </div>
+        <GuestLoginButton variant="link" disabled={busy} onBusyChange={setGuestBusy} />
       </form>
     </div>
   );

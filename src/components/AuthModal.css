@@ -71,16 +71,6 @@
     transform 0.1s ease;
 }
 
-.guest-button {
-  border: none;
-  background: #e63946;
-  color: white;
-}
-
-.guest-button:hover {
-  background: #c92f3b;
-}
-
 .secondary-button {
   border: 1px solid var(--surface-line, #626262);
   background: #0a0a0a;
@@ -121,11 +111,6 @@
   border-color: var(--surface-line);
   color: var(--text-primary);
   box-shadow: 0 0 14px #00000030;
-}
-
-.light-theme .guest-button {
-  background: var(--accent);
-  color: var(--text-primary);
 }
 
 .app-shell.light-theme .auth-options .guest-button:hover:not(:disabled) {

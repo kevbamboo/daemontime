@@ -4,7 +4,7 @@ import "./App.css";
 import Home from "./components/Home";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
-import ThemeToggle from "./components/ThemeToggle";
+import HamburgerMenu from "./components/HamburgerMenu";
 import { supabase } from "./lib/supabase";
 import { socketService } from "./services/socket.service";
 
@@ -44,7 +44,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <div className={`${dark ? "dark-theme" : "light-theme"} app-shell${changingTheme ? " theme-changing" : ""}`}>
-        <ThemeToggle dark={dark} onChange={changeTheme} />
+        <HamburgerMenu dark={dark} onThemeChange={changeTheme} authenticated={authenticated} />
         <Suspense fallback={<p role="status">Loading page...</p>}>
         <Routes>
           <Route path="/" element={<Home authenticated={authenticated} />} />

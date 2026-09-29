@@ -11,7 +11,6 @@ export default function SiteHeader() {
 
         <nav className="site-nav">
           <Link to="/">Home</Link>
-          <Link to="/games">Games</Link>
         </nav>
       </div>
     </header>
