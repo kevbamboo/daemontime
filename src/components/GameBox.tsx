@@ -1,27 +1,22 @@
-
-function findCurrentGame(games: Game[]) {
-  return games.find((game) =>
-    game.players.some((player) => player.id === socketService.userId),
-  );
-}
-
-function isFinished(update: GameUpdate | null) {
-  return update?.phase === 'finished' || update?.phase === 'interrupted';
-}
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import EmptyLobby from "./EmptyLobby";
-import MessageBox from "./MessageBox";
+import ChatPanel from "./ChatPanel";
+import { useSocketState } from "../hooks/useSocketState";
 import GameCard from "./GameCard";
 import NewGameModal from "./NewGameModal";
 import GamePlay from "./GamePlay";
-import {
-  socketService,
-  type Game,
-  type GameUpdate,
-} from "../services/socket.service";
+import { socketService } from "../services/socket.service";
 import "./GameBox.css";
 
-function ConnectionStatus({ busy, onRetry }: { busy: boolean; onRetry: () => void }) {
+function ConnectionStatus({
+  busy,
+  error,
+  onRetry,
+}: {
+  busy: boolean;
+  error: string;
+  onRetry: () => void;
+}) {
   const [canRetry, setCanRetry] = useState(false);
   useEffect(() => {
     const timeout = window.setTimeout(() => setCanRetry(true), 5000);
@@ -29,62 +24,39 @@ function ConnectionStatus({ busy, onRetry }: { busy: boolean; onRetry: () => voi
   }, []);
   return (
     <div className="connection-overlay">
-      {!socketService.error && (
+      {!error && (
         <p role="status" aria-label="Connecting">
-          Connecting<span className="connecting-dots" aria-hidden="true" />
+          Connecting
+          <span className="connecting-dots" aria-hidden="true" />
         </p>
       )}
-      {socketService.error && <p role="alert">{socketService.error}</p>}
-      {canRetry && <button disabled={busy} onClick={onRetry}>Retry</button>}
+      {error && <p role="alert">{error}</p>}
+      {canRetry && (
+        <button disabled={busy} onClick={onRetry}>
+          Retry
+        </button>
+      )}
     </div>
   );
 }
 
 export default function GameBox() {
   const newGameButtonRef = useRef<HTMLButtonElement>(null);
-  const [games, setGames] = useState<Game[]>([]);
-  const [gameUpdate, setGameUpdate] = useState<GameUpdate | null>(null);
-  const [, redraw] = useState(0);
+  const { games, gameUpdate, ready, error, userId, onlineUsers } =
+    useSocketState();
   const [busy, setBusy] = useState(false);
   const [creating, setCreating] = useState(false);
-  const [activeTab, setActiveTab] = useState<"users" | "lobby" | "game">(
-    "lobby",
+  const game = games.find((candidate) =>
+    candidate.players.some((player) => player.id === userId),
   );
-  const [, redrawUsers] = useState(0);
-  useEffect(() => {
-    let previousGameId: string | undefined;
-    const gamesOff = socketService.subscribeToGames((nextGames) => {
-      const nextGameId = nextGames.find((g) =>
-        g.players.some((p) => p.id === socketService.userId),
-      )?.gameId;
-      if (nextGameId && nextGameId !== previousGameId) setActiveTab("game");
-      previousGameId = nextGameId;
-      setGames(nextGames);
-    });
-    const statusOff = socketService.subscribeToStatus(() =>
-      redraw((n) => n + 1),
-    );
-    const usersOff = socketService.subscribeToOnlineUsers(() =>
-      redrawUsers((n) => n + 1),
-    );
-    const gameUpdatesOff = socketService.subscribeToGameUpdates(setGameUpdate);
-    return () => {
-      gamesOff();
-      statusOff();
-      usersOff();
-      gameUpdatesOff();
-    };
-  }, []);
-  const game = findCurrentGame(games);
-  const hasGameTab = !!game;
-  const useNativeCursor = creating || hasGameTab;
+  const useNativeCursor = creating || !!game;
   useLayoutEffect(() => {
     const root = document.documentElement;
     root.toggleAttribute("data-native-cursor", useNativeCursor);
     return () => root.removeAttribute("data-native-cursor");
   }, [useNativeCursor]);
-  const selectedTab = activeTab === "game" && !hasGameTab ? "lobby" : activeTab;
-  const gameEnded = isFinished(gameUpdate);
+  const gameEnded =
+    gameUpdate?.phase === "finished" || gameUpdate?.phase === "interrupted";
   async function action(fn: () => Promise<unknown>) {
     if (busy) return;
     setBusy(true);
@@ -99,12 +71,11 @@ export default function GameBox() {
   return (
     <div id="game">
       <h1 className="game-title">Daemon Time</h1>
-      {socketService.ready && socketService.error && (
-        <p role="alert">{socketService.error}</p>
-      )}
-      {!socketService.ready ? (
+      {ready && error && <p role="alert">{error}</p>}
+      {!ready ? (
         <ConnectionStatus
           busy={busy}
+          error={error}
           onRetry={() => void action(() => socketService.retryConnection())}
         />
       ) : (
@@ -127,13 +98,15 @@ export default function GameBox() {
                   <EmptyLobby buttonRef={newGameButtonRef} />
                 )}
                 <div id="game-list">
-                  {games.map((g) => (
+                  {games.map((listedGame) => (
                     <GameCard
-                      key={g.gameId}
-                      game={g}
+                      key={listedGame.gameId}
+                      game={listedGame}
                       disabled={busy}
                       onJoin={() =>
-                        void action(() => socketService.joinGame(g.gameId))
+                        void action(() =>
+                          socketService.joinGame(listedGame.gameId),
+                        )
                       }
                     />
                   ))}
@@ -163,6 +136,7 @@ export default function GameBox() {
                 {game.started ? (
                   <GamePlay
                     key={game.gameId}
+                    userId={userId}
                     update={
                       gameUpdate?.gameId === game.gameId ? gameUpdate : null
                     }
@@ -181,17 +155,17 @@ export default function GameBox() {
                     {game.players.length === 1 && (
                       <p>Waiting for players to join...</p>
                     )}
-                    {socketService.isCurrentGameHost && (
+                    {game.hostId === userId && (
                       <button
                         className="start-game-button"
-                        disabled={busy || game.started}
+                        disabled={busy}
                         onClick={() =>
                           void action(() =>
                             socketService.startGame(game.gameId),
                           )
                         }
                       >
-                        {game.started ? "Started" : "Start Game"}
+                        Start Game
                       </button>
                     )}
                   </div>
@@ -199,91 +173,12 @@ export default function GameBox() {
               </>
             )}
           </div>
-          <aside className="chat-panel">
-            <div
-              className="chat-tabs"
-              role="tablist"
-              aria-label="Lobby sidebar"
-              onKeyDown={(event) => {
-                const tabs = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
-                const index = tabs.indexOf(event.target as HTMLButtonElement);
-                if (index < 0) return;
-                let next: number;
-                if (event.key === "ArrowRight") next = (index + 1) % tabs.length;
-                else if (event.key === "ArrowLeft") next = (index + tabs.length - 1) % tabs.length;
-                else if (event.key === "Home") next = 0;
-                else if (event.key === "End") next = tabs.length - 1;
-                else return;
-                event.preventDefault();
-                tabs[next].focus();
-                tabs[next].click();
-              }}
-              style={
-                {
-                  "--tab-index":
-                    selectedTab === "users"
-                      ? 0
-                      : selectedTab === "lobby"
-                        ? 1
-                        : 2,
-                  "--tab-count": hasGameTab ? 3 : 2,
-                } as React.CSSProperties
-              }
-            >
-              <button
-                className={selectedTab === "users" ? "active" : ""}
-                role="tab"
-                id="users-tab"
-                aria-controls="sidebar-panel"
-                tabIndex={selectedTab === "users" ? 0 : -1}
-                aria-selected={selectedTab === "users"}
-                onClick={() => setActiveTab("users")}
-              >
-                Online <span>{socketService.onlineUsers.length}</span>
-              </button>
-              <button
-                className={selectedTab === "lobby" ? "active" : ""}
-                role="tab"
-                id="lobby-tab"
-                aria-controls="sidebar-panel"
-                tabIndex={selectedTab === "lobby" ? 0 : -1}
-                aria-selected={selectedTab === "lobby"}
-                onClick={() => setActiveTab("lobby")}
-              >
-                Lobby Chat
-              </button>
-              {hasGameTab && (
-                <button
-                  className={selectedTab === "game" ? "active" : ""}
-                  role="tab"
-                  id="game-tab"
-                  aria-controls="sidebar-panel"
-                  tabIndex={selectedTab === "game" ? 0 : -1}
-                  aria-selected={selectedTab === "game"}
-                  onClick={() => setActiveTab("game")}
-                >
-                  Game Chat
-                </button>
-              )}
-            </div>
-            <div id="sidebar-panel" className="sidebar-panel" role="tabpanel" aria-labelledby={`${selectedTab}-tab`}>
-            {selectedTab === "users" ? (
-              <div className="online-users">
-                <ul>
-                  {socketService.onlineUsers.map((user) => (
-                    <li key={user.id}>
-                      <span className="online-dot" />
-                      {user.username}
-                      {user.id === socketService.userId && <small>You</small>}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : (
-              <MessageBox gameState={selectedTab === "game" ? 1 : 0} />
-            )}
-            </div>
-          </aside>
+          <ChatPanel
+            key={game?.gameId ?? "lobby"}
+            gameId={game?.gameId}
+            userId={userId}
+            onlineUsers={onlineUsers}
+          />
         </>
       )}
       {creating && <NewGameModal onClose={() => setCreating(false)} />}

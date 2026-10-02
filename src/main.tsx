@@ -9,7 +9,3 @@ createRoot(document.getElementById("root")!).render(
     <SymbolCursor />
   </>,
 );
-
-/*StrictMode>
-    <App />
-  </StrictMode>,*/

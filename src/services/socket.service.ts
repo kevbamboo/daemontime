@@ -1,6 +1,5 @@
-import { io, Socket } from "socket.io-client";
+import { io, type Socket } from "socket.io-client";
 export type Player = { id: string; username: string };
-export type OnlineUser = Player;
 export type GameOptions = { timeLimit: number; numberOfQuestions: number };
 export type Game = GameOptions & {
   gameId: string;
@@ -47,215 +46,259 @@ export type GameUpdate = {
 };
 type Reply<T> = { ok: true; data: T } | { ok: false; error: string };
 
-class SocketService {
+const REQUEST_TIMEOUT_MS = 8000;
+const MESSAGE_HISTORY_LIMIT = 200;
+
+type SocketState = {
+  ready: boolean;
+  error: string;
+  userId: string;
+  username: string;
+  games: Game[];
+  gameUpdate: GameUpdate | null;
+  lobbyMessages: ChatMessage[];
+  gameMessages: ChatMessage[];
+  onlineUsers: Player[];
+};
+
+function createInitialState(): SocketState {
+  return {
+    ready: false,
+    error: "",
+    userId: "",
+    username: "",
+    games: [],
+    gameUpdate: null,
+    lobbyMessages: [],
+    gameMessages: [],
+    onlineUsers: [],
+  };
+}
+
+export class SocketService {
   private socket: Socket | null = null;
-  private games: Game[] = [];
-  private gameListeners = new Set<(games: Game[]) => void>();
-  private gameUpdateListeners = new Set<(update: GameUpdate | null) => void>();
-  private gameUpdate: GameUpdate | null = null;
-  private acceptGameUpdate(update: GameUpdate | null) {
-    this.gameUpdate = update;
-    for (const listener of this.gameUpdateListeners) listener(update);
+  private state = createInitialState();
+  private listeners = new Set<() => void>();
+  private connectionVersion = 0;
+  private url: string | undefined;
+  private createSocket: typeof io;
+
+  constructor(url?: string, createSocket: typeof io = io) {
+    this.url = url || undefined;
+    this.createSocket = createSocket;
   }
-  private messageListeners = new Set<() => void>();
-  private statusListeners = new Set<() => void>();
-  private onlineUserListeners = new Set<() => void>();
-  error = "";
-  ready = false;
-  userId = "";
-  username = "";
-  lobbyMessages: ChatMessage[] = [];
-  gameMessages: ChatMessage[] = [];
-  onlineUsers: OnlineUser[] = [];
-  get currentGame() {
-    return this.games.find((g) => g.players.some((p) => p.id === this.userId));
+
+  // Stable functions and immutable snapshots let React subscribe without
+  // copying service state into components or forcing renders with counters.
+  getSnapshot = () => this.state;
+
+  subscribe = (listener: () => void) => {
+    this.listeners.add(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
+  };
+
+  private updateState(changes: Partial<SocketState>) {
+    this.state = { ...this.state, ...changes };
+    for (const listener of this.listeners) listener();
   }
-  get currentGameId() {
-    return this.currentGame?.gameId ?? "";
+
+  private get currentGameId() {
+    const { games, userId } = this.state;
+    return games.find((game) =>
+      game.players.some((player) => player.id === userId),
+    )?.gameId;
   }
-  get isCurrentGameHost() {
-    return !!this.userId && this.currentGame?.hostId === this.userId;
-  }
-  private notifyStatus() {
-    for (const listener of this.statusListeners) listener();
-  }
+
   private acceptGames(games: Game[]) {
-    const previous = this.currentGameId;
-    this.games = games;
-    if (previous !== this.currentGameId) {
-      this.gameMessages = [];
-      this.notifyMessages();
-      this.acceptGameUpdate(null);
-    }
-    for (const listener of this.gameListeners) listener(this.games);
+    const previousGameId = this.currentGameId;
+    const currentGame = games.find((game) =>
+      game.players.some((player) => player.id === this.state.userId),
+    );
+    const roomChanged = previousGameId !== currentGame?.gameId;
+
+    this.updateState({
+      games,
+      ...(roomChanged ? { gameMessages: [], gameUpdate: null } : {}),
+    });
   }
+
   connect(token: string, userId: string) {
-    if (this.socket && this.userId !== userId) this.disconnect();
-    this.userId = userId;
+    if (this.socket && this.state.userId !== userId) this.disconnect();
     if (this.socket) {
       this.socket.auth = { token };
       if (!this.socket.connected) this.socket.connect();
       return;
     }
-    const socket = io(
-      import.meta.env.DEV
-        ? "http://localhost:3000"
-        : import.meta.env.VITE_SOCKET_URL || window.location.origin,
-      { auth: { token }, autoConnect: false },
-    );
+
+    this.updateState({ userId });
+    // With no URL, Socket.IO uses the page origin and Vite's local proxy.
+    const socket = this.createSocket(this.url, {
+      auth: { token },
+      autoConnect: false,
+    });
     this.socket = socket;
+
     socket.on(
       "socket-identity",
       (identity: { userId: string; username: string }) => {
-        this.userId = identity.userId;
-        this.username = identity.username;
+        this.updateState({
+          userId: identity.userId,
+          username: identity.username,
+        });
       },
     );
     socket.on("connect", () => {
-      void this.joinLobby().catch((error) => {
-        if (this.socket === socket) this.reportError(error);
+      const version = ++this.connectionVersion;
+      this.updateState({ ready: false, error: "" });
+      void this.joinLobby().catch((error: unknown) => {
+        if (this.socket === socket && this.connectionVersion === version) {
+          this.reportError(error);
+        }
       });
     });
     socket.on("disconnect", () => {
-      this.ready = false;
-      this.error = "Connection lost. Reconnecting…";
-      this.notifyStatus();
+      this.connectionVersion++;
+      this.updateState({
+        ready: false,
+        error: "Connection lost. Reconnecting?",
+        onlineUsers: [],
+      });
     });
-    socket.on("connect_error", (error: Error) => this.reportError(error));
+    socket.on("connect_error", (error: Error) => {
+      this.updateState({ ready: false, error: error.message });
+    });
     socket.on("games-snapshot", (games: Game[]) => this.acceptGames(games));
     socket.on("game-update", (update: GameUpdate) => {
-      if (update.gameId === this.currentGameId)
-        this.acceptGameUpdate({ ...update, receivedAt: Date.now() });
+      if (update.gameId === this.currentGameId) {
+        this.updateState({ gameUpdate: { ...update, receivedAt: Date.now() } });
+      }
     });
-    socket.on("online-users", (users: OnlineUser[]) => {
-      this.onlineUsers = users;
-      for (const listener of this.onlineUserListeners) listener();
+    socket.on("online-users", (onlineUsers: Player[]) => {
+      this.updateState({ onlineUsers });
     });
     socket.on("chat-message", (message: ChatMessage) => {
-      if (message.gameId === null)
-        this.lobbyMessages = [...this.lobbyMessages.slice(-199), message];
-      else if (message.gameId === this.currentGameId)
-        this.gameMessages = [...this.gameMessages.slice(-199), message];
-      this.notifyMessages();
+      const { lobbyMessages, gameMessages } = this.state;
+      if (message.gameId === null) {
+        this.updateState({
+          lobbyMessages: [
+            ...lobbyMessages.slice(1 - MESSAGE_HISTORY_LIMIT),
+            message,
+          ],
+        });
+      } else if (message.gameId === this.currentGameId) {
+        this.updateState({
+          gameMessages: [
+            ...gameMessages.slice(1 - MESSAGE_HISTORY_LIMIT),
+            message,
+          ],
+        });
+      }
     });
     socket.connect();
   }
+
   reportError(error: unknown) {
-    this.error = error instanceof Error ? error.message : "Request failed";
-    this.notifyStatus();
+    this.updateState({
+      error: error instanceof Error ? error.message : "Request failed",
+    });
   }
+
   async retryConnection() {
     if (!this.socket) throw new Error("Sign in before connecting");
-    this.error = "";
-    this.notifyStatus();
+    this.updateState({ error: "" });
     if (!this.socket.connected) {
       this.socket.connect();
       return;
     }
     await this.joinLobby();
   }
+
   disconnect() {
-    this.acceptGameUpdate(null);
+    this.connectionVersion++;
     this.socket?.removeAllListeners();
     this.socket?.disconnect();
     this.socket = null;
-    this.ready = false;
-    this.error = "";
-    this.userId = "";
-    this.username = "";
-    this.lobbyMessages = [];
-    this.gameMessages = [];
-    this.onlineUsers = [];
-    this.acceptGames([]);
-    this.notifyMessages();
-    this.notifyStatus();
+    this.updateState(createInitialState());
   }
-  subscribeToGames(listener: (games: Game[]) => void) {
-    this.gameListeners.add(listener);
-    listener(this.games);
-    return () => {
-      this.gameListeners.delete(listener);
-    };
-  }
-  subscribeToGameUpdates(listener: (update: GameUpdate | null) => void) {
-    this.gameUpdateListeners.add(listener);
-    listener(this.gameUpdate);
-    return () => {
-      this.gameUpdateListeners.delete(listener);
-    };
-  }
-  subscribeToStatus(listener: () => void) {
-    this.statusListeners.add(listener);
-    return () => {
-      this.statusListeners.delete(listener);
-    };
-  }
-  subscribeToMessages(listener: () => void) {
-    this.messageListeners.add(listener);
-    return () => {
-      this.messageListeners.delete(listener);
-    };
-  }
-  subscribeToOnlineUsers(listener: () => void) {
-    this.onlineUserListeners.add(listener);
-    listener();
-    return () => {
-      this.onlineUserListeners.delete(listener);
-    };
-  }
-  private notifyMessages() {
-    for (const listener of this.messageListeners) listener();
-  }
+
   private request<T>(event: string, ...args: unknown[]): Promise<T> {
     const socket = this.socket;
-    if (!socket?.connected)
+    const version = this.connectionVersion;
+    if (!socket?.connected) {
       return Promise.reject(
         new Error("Not connected. Please retry when connected."),
       );
+    }
+
     return new Promise((resolve, reject) => {
       socket
-        .timeout(8000)
-        .emit(event, ...args, (error: Error | null, reply: Reply<T>) => {
-          if (socket !== this.socket)
-            return reject(new Error("Session changed"));
-          if (error)
-            return reject(new Error("Request timed out. Please retry."));
-          if (!reply?.ok)
-            return reject(new Error(reply?.error || "Invalid server response"));
-          this.error = "";
-          this.notifyStatus();
-          resolve(reply.data);
+        .timeout(REQUEST_TIMEOUT_MS)
+        .emit(event, ...args, (error: Error | null, reply?: Reply<T>) => {
+          // The socket object survives reconnects; its identity alone cannot
+          // distinguish a late acknowledgement from an earlier connection.
+          if (socket !== this.socket || version !== this.connectionVersion) {
+            reject(new Error("Connection changed. Please retry."));
+          } else if (error) {
+            reject(new Error("Request timed out. Please retry."));
+          } else if (!reply?.ok) {
+            reject(new Error(reply?.error || "Invalid server response"));
+          } else {
+            this.updateState({ error: "" });
+            resolve(reply.data);
+          }
         });
     });
   }
-  async joinLobby() {
+
+  private async joinLobby() {
     const socket = this.socket;
+    const version = this.connectionVersion;
     const games = await this.request<Game[]>("join-lobby");
-    if (socket !== this.socket || !socket?.connected) return;
+    if (
+      socket !== this.socket ||
+      version !== this.connectionVersion ||
+      !socket?.connected
+    ) {
+      return;
+    }
     this.acceptGames(games);
-    this.ready = true;
-    this.error = "";
-    this.notifyStatus();
+    this.updateState({ ready: true, error: "" });
   }
-  async createGame(options: GameOptions) {
+
+  createGame(options: GameOptions) {
     return this.request<Game>("create-game", options);
   }
-  async joinGame(id: string) {
-    return this.request<Game>("join-game", id);
+
+  joinGame(gameId: string) {
+    return this.request<Game>("join-game", gameId);
   }
-  async startGame(id: string) {
-    return this.request<boolean>("start-game", id);
+
+  startGame(gameId: string) {
+    return this.request<boolean>("start-game", gameId);
   }
-  async submitAnswer(id: string, questionIndex: number, choice: number) {
-    return this.request<boolean>("submit-answer", id, questionIndex, choice);
+
+  submitAnswer(gameId: string, questionIndex: number, choice: number) {
+    return this.request<boolean>(
+      "submit-answer",
+      gameId,
+      questionIndex,
+      choice,
+    );
   }
-  async leaveGame(id: string) {
-    return this.request<boolean>("leave-game", id);
+
+  leaveGame(gameId: string) {
+    return this.request<boolean>("leave-game", gameId);
   }
-  async sendMessage(text: string, gameId?: string) {
+
+  sendMessage(text: string, gameId?: string) {
     return gameId
       ? this.request<boolean>("game-message", gameId, text)
       : this.request<boolean>("lobby-message", text);
   }
 }
-export const socketService = new SocketService();
+
+export const socketService = new SocketService(
+  import.meta.env?.VITE_SOCKET_URL,
+);

@@ -1,7 +1,7 @@
 import { useState, type SubmitEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { login } from "../services/auth.service";
-import "./Login.css";
+import "./AuthForm.css";
 import PasswordToggle from "./PasswordToggle";
 import GuestLoginButton from "./GuestLoginButton";
 
@@ -12,21 +12,18 @@ export default function Login() {
   const [busy, setBusy] = useState(false);
   const [guestBusy, setGuestBusy] = useState(false);
 
-  async function handleLogin(e: SubmitEvent) {
-    e.preventDefault();
+  async function handleLogin(event: SubmitEvent<HTMLFormElement>) {
+    event.preventDefault();
     if (busy || guestBusy) return;
     setBusy(true);
     setNotice("");
 
-    const form = e.currentTarget as HTMLFormElement;
-
-    const email = (form.elements.namedItem("email") as HTMLInputElement).value;
-
-    const password = (form.elements.namedItem("password") as HTMLInputElement)
-      .value;
+    const data = new FormData(event.currentTarget);
+    const email = String(data.get("email")).trim();
+    const password = String(data.get("password"));
 
     try {
-      const { error } = await login(email.trim(), password);
+      const { error } = await login(email, password);
 
       if (error) {
         setNotice(error.message);
@@ -55,13 +52,13 @@ export default function Login() {
         </div>
 
         {notice && <p role="alert">{notice}</p>}
-        <form id="login-form" autoComplete="off" onSubmit={handleLogin}>
+        <form id="login-form" onSubmit={handleLogin}>
           <div className="input-container">
             <input
               type="email"
               id="email"
               name="email"
-              autoComplete="off"
+              autoComplete="username"
               placeholder=" "
               required
             />
@@ -73,7 +70,7 @@ export default function Login() {
               type={showPassword ? "text" : "password"}
               id="password"
               name="password"
-              autoComplete="off"
+              autoComplete="current-password"
               placeholder=" "
               required
             />
@@ -89,13 +86,19 @@ export default function Login() {
             <Link to="/forgot-password">Forgot password?</Link>
           </div>
 
-          <button type="submit" disabled={busy || guestBusy}>{busy ? "Logging in..." : "Log in"}</button>
+          <button type="submit" disabled={busy || guestBusy}>
+            {busy ? "Logging in..." : "Log in"}
+          </button>
         </form>
 
         <div className="signup-prompt">
           Don't have an account? <Link to="/signup">Create one</Link>
         </div>
-        <GuestLoginButton variant="link" disabled={busy} onBusyChange={setGuestBusy} />
+        <GuestLoginButton
+          variant="link"
+          disabled={busy}
+          onBusyChange={setGuestBusy}
+        />
       </div>
     </main>
   );

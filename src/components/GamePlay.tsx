@@ -31,25 +31,37 @@ function Timer({ update }: { update: GameUpdate }) {
   );
 }
 
-function Scoreboard({ update }: { update: GameUpdate }) {
-  function getStatus(player: GameUpdate['scores'][number]) {
-    if (!player.active) return 'Left';
-    if (update.phase === 'finished') return 'Finished';
+function Scoreboard({
+  update,
+  userId,
+}: {
+  update: GameUpdate;
+  userId: string;
+}) {
+  function getStatus(player: GameUpdate["scores"][number]) {
+    if (!player.active) return "Left";
+    if (update.phase === "finished") return "Finished";
     if (player.submitted && player.answerPoints !== undefined) {
       const points = player.answerPoints;
       return points > 0 ? (
-        <span className="answer-result answer-result-correct" aria-label={`Correct, gained ${points} ${points === 1 ? "point" : "points"}`}>
+        <span
+          className="answer-result answer-result-correct"
+          aria-label={`Correct, gained ${points} ${points === 1 ? "point" : "points"}`}
+        >
           <span aria-hidden="true">✓</span> (+{points})
         </span>
       ) : (
-        <span className="answer-result answer-result-incorrect" aria-label="Incorrect">
+        <span
+          className="answer-result answer-result-incorrect"
+          aria-label="Incorrect"
+        >
           <span aria-hidden="true">✗</span>
         </span>
       );
     }
-    if (player.submitted) return 'Submitted';
-    if (update.phase === 'scoreboard') return 'No answer';
-    return 'Answering';
+    if (player.submitted) return "Submitted";
+    if (update.phase === "scoreboard") return "No answer";
+    return "Answering";
   }
 
   return (
@@ -68,11 +80,11 @@ function Scoreboard({ update }: { update: GameUpdate }) {
         {update.scores.map((player) => (
           <tr
             key={player.id}
-            className={player.id === socketService.userId ? "your-score" : ""}
+            className={player.id === userId ? "your-score" : ""}
           >
             <th scope="row">
               {player.username}
-              {player.id === socketService.userId ? " (You)" : ""}
+              {player.id === userId ? " (You)" : ""}
             </th>
             <td>{player.score}</td>
             <td>{getStatus(player)}</td>
@@ -81,11 +93,6 @@ function Scoreboard({ update }: { update: GameUpdate }) {
       </tbody>
     </table>
   );
-}
-
-function StatusMessage({ update }: { update: GameUpdate }) {
-  if (update.phase !== 'question') return null;
-  return <p role="status">Answer submitted. Waiting for the other players or the timer.</p>;
 }
 
 function Question({
@@ -146,7 +153,11 @@ function Question({
         className="game-primary-button"
         disabled={choice === null || busy || submitted}
       >
-        {submitted ? "Answer submitted" : busy ? "Submitting..." : "Submit answer"}
+        {submitted
+          ? "Answer submitted"
+          : busy
+            ? "Submitting..."
+            : "Submit answer"}
       </button>
     </form>
   );
@@ -159,6 +170,7 @@ function Review({ questions }: { questions: ReviewQuestion[] }) {
     function onKey(event: KeyboardEvent) {
       const target = event.target;
       if (
+        event.defaultPrevented ||
         event.altKey ||
         event.ctrlKey ||
         event.metaKey ||
@@ -166,7 +178,7 @@ function Review({ questions }: { questions: ReviewQuestion[] }) {
         (target instanceof HTMLElement &&
           (target.isContentEditable ||
             target.closest(
-              'input:not([role="switch"]), textarea, select, [role="textbox"]',
+              'input, textarea, select, [role="textbox"], [role="tab"], dialog[open]',
             )))
       )
         return;
@@ -256,7 +268,13 @@ function Review({ questions }: { questions: ReviewQuestion[] }) {
   );
 }
 
-export default function GamePlay({ update }: { update: GameUpdate | null }) {
+export default function GamePlay({
+  update,
+  userId,
+}: {
+  update: GameUpdate | null;
+  userId: string;
+}) {
   if (!update)
     return (
       <section className="gameplay">
@@ -299,8 +317,12 @@ export default function GamePlay({ update }: { update: GameUpdate | null }) {
       </div>
       {showScores ? (
         <>
-          <StatusMessage update={update} />
-          <Scoreboard update={update} />
+          {update.phase === "question" && (
+            <p role="status">
+              Answer submitted. Waiting for the other players or the timer.
+            </p>
+          )}
+          <Scoreboard update={update} userId={userId} />
         </>
       ) : (
         update.question && (

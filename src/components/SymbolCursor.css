@@ -30,7 +30,10 @@ html[data-native-cursor] .symbol-cursor-layer {
   height: 24px;
   margin: -12px 0 0 -12px;
   text-align: center;
-  font: 700 22px / 24px "Courier New", Courier, monospace;
+  font:
+    700 22px / 24px "Courier New",
+    Courier,
+    monospace;
   text-shadow: 0 0 2px #111111;
 }
 
@@ -45,7 +48,10 @@ html[data-native-cursor] .symbol-cursor-layer {
   height: 24px;
   overflow: visible;
   fill: currentColor;
-  font: 700 22px / 24px "Courier New", Courier, monospace;
+  font:
+    700 22px / 24px "Courier New",
+    Courier,
+    monospace;
 }
 
 .symbol-cursor-trail {
@@ -59,7 +65,8 @@ html[data-native-cursor] .symbol-cursor-layer {
   }
   to {
     opacity: 0;
-    transform: translate(var(--drift), var(--fall-distance)) rotate(var(--rotation));
+    transform: translate(var(--drift), var(--fall-distance))
+      rotate(var(--rotation));
   }
 }
 

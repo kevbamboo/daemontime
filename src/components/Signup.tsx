@@ -1,7 +1,7 @@
 import { useState, type SubmitEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { signup } from "../services/auth.service";
-import "./Signup.css";
+import "./AuthForm.css";
 import PasswordToggle from "./PasswordToggle";
 import GuestLoginButton from "./GuestLoginButton";
 
@@ -12,27 +12,23 @@ export default function Signup() {
   const [busy, setBusy] = useState(false);
   const [guestBusy, setGuestBusy] = useState(false);
 
-  async function handleSignup(e: SubmitEvent) {
-    e.preventDefault();
+  async function handleSignup(event: SubmitEvent<HTMLFormElement>) {
+    event.preventDefault();
     if (busy || guestBusy) return;
     setNotice("");
 
-    const form = e.currentTarget as HTMLFormElement;
+    const data = new FormData(event.currentTarget);
+    const email = String(data.get("email")).trim();
+    const username = String(data.get("username")).trim();
+    const password = String(data.get("password"));
 
-    const email = (form.elements.namedItem("email") as HTMLInputElement).value;
-    const username = (form.elements.namedItem("username") as HTMLInputElement)
-      .value;
-
-    const password = (form.elements.namedItem("password") as HTMLInputElement)
-      .value;
-
-    if (!username.trim()) {
+    if (!username) {
       setNotice("Enter a username.");
       return;
     }
     setBusy(true);
     try {
-      const { data, error } = await signup(email.trim(), username.trim(), password);
+      const { data, error } = await signup(email, username, password);
 
       if (error) {
         setNotice(error.message);
@@ -55,7 +51,7 @@ export default function Signup() {
 
   return (
     <div id="signup-page">
-      <form id="signup-form" autoComplete="off" onSubmit={handleSignup}>
+      <form id="signup-form" onSubmit={handleSignup}>
         <div className="signup-header">
           <div className="auth-heading">
             <h1>Create your account</h1>
@@ -70,7 +66,7 @@ export default function Signup() {
             type="email"
             id="email"
             name="email"
-            autoComplete="off"
+            autoComplete="email"
             placeholder=" "
             required
           />
@@ -82,7 +78,7 @@ export default function Signup() {
             type="text"
             id="username"
             name="username"
-            autoComplete="off"
+            autoComplete="username"
             placeholder=" "
             required
           />
@@ -94,7 +90,7 @@ export default function Signup() {
             type={showPassword ? "text" : "password"}
             id="password"
             name="password"
-            autoComplete="off"
+            autoComplete="new-password"
             minLength={6}
             placeholder=" "
             required
@@ -107,12 +103,18 @@ export default function Signup() {
           />
         </div>
 
-        <button type="submit" disabled={busy || guestBusy}>{busy ? "Signing up..." : "Sign up"}</button>
+        <button type="submit" disabled={busy || guestBusy}>
+          {busy ? "Signing up..." : "Sign up"}
+        </button>
 
         <div className="signup-login">
           Already have an account? <Link to="/login">Log in</Link>
         </div>
-        <GuestLoginButton variant="link" disabled={busy} onBusyChange={setGuestBusy} />
+        <GuestLoginButton
+          variant="link"
+          disabled={busy}
+          onBusyChange={setGuestBusy}
+        />
       </form>
     </div>
   );

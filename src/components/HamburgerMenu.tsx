@@ -10,7 +10,11 @@ type HamburgerMenuProps = {
   authenticated: boolean;
 };
 
-export default function HamburgerMenu({ dark, onThemeChange, authenticated }: HamburgerMenuProps) {
+export default function HamburgerMenu({
+  dark,
+  onThemeChange,
+  authenticated,
+}: HamburgerMenuProps) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -19,15 +23,19 @@ export default function HamburgerMenu({ dark, onThemeChange, authenticated }: Ha
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!open) return;
-    const element = dialog.current!;
+    const element = dialog.current;
+    if (!open || !element) return;
     element.show();
-    function onPointerDown(event: PointerEvent) {
-      if (event.target instanceof Node &&
-          !element.contains(event.target) && !trigger.current?.contains(event.target)) {
+
+    const closeWhenOutside = (event: Event) => {
+      if (
+        event.target instanceof Node &&
+        !element.contains(event.target) &&
+        !trigger.current?.contains(event.target)
+      ) {
         setOpen(false);
       }
-    }
+    };
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
         event.preventDefault();
@@ -35,10 +43,12 @@ export default function HamburgerMenu({ dark, onThemeChange, authenticated }: Ha
         trigger.current?.focus();
       }
     }
-    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("pointerdown", closeWhenOutside);
+    document.addEventListener("focusin", closeWhenOutside);
     document.addEventListener("keydown", onKeyDown);
     return () => {
-      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("pointerdown", closeWhenOutside);
+      document.removeEventListener("focusin", closeWhenOutside);
       document.removeEventListener("keydown", onKeyDown);
       element.close();
     };
@@ -54,7 +64,11 @@ export default function HamburgerMenu({ dark, onThemeChange, authenticated }: Ha
       setOpen(false);
       navigate("/");
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Unable to log out. Please retry.");
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Unable to log out. Please retry.",
+      );
     } finally {
       setBusy(false);
     }
@@ -79,20 +93,29 @@ export default function HamburgerMenu({ dark, onThemeChange, authenticated }: Ha
           <path d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>
-      {open && <div className="hamburger-menu-backdrop" aria-hidden="true" />}
+      <div
+        className="hamburger-menu-backdrop"
+        data-open={open}
+        aria-hidden="true"
+      />
       <dialog
         ref={dialog}
         id="settings-menu"
         className="hamburger-menu"
         aria-labelledby="settings-menu-title"
-        onClose={() => setOpen(false)}
+        inert={!open}
       >
         <div className="hamburger-menu-header">
           <h2 id="settings-menu-title">Menu</h2>
-          <button type="button" className="hamburger-menu-close" aria-label="Close menu" onClick={() => {
-            setOpen(false);
-            trigger.current?.focus();
-          }}>
+          <button
+            type="button"
+            className="hamburger-menu-close"
+            aria-label="Close menu"
+            onClick={() => {
+              setOpen(false);
+              trigger.current?.focus();
+            }}
+          >
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="m6 6 12 12M6 18 18 6" />
             </svg>
@@ -105,7 +128,12 @@ export default function HamburgerMenu({ dark, onThemeChange, authenticated }: Ha
         {authenticated && (
           <div className="hamburger-menu-footer">
             {error && <p role="alert">{error}</p>}
-            <button type="button" className="logout-button" disabled={busy} onClick={handleLogout}>
+            <button
+              type="button"
+              className="logout-button"
+              disabled={busy}
+              onClick={handleLogout}
+            >
               {busy ? "Logging out..." : "Log out"}
             </button>
           </div>

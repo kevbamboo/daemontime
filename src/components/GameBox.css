@@ -39,7 +39,9 @@
   color: var(--text-primary, #f5f5f5);
 }
 
-.connection-overlay p { margin: 0; }
+.connection-overlay p {
+  margin: 0;
+}
 
 .connecting-dots {
   display: inline-block;
@@ -51,9 +53,18 @@
 }
 
 @keyframes connecting-dots {
-  0%, 33% { content: "."; }
-  34%, 66% { content: ".."; }
-  67%, 100% { content: "..."; }
+  0%,
+  33% {
+    content: ".";
+  }
+  34%,
+  66% {
+    content: "..";
+  }
+  67%,
+  100% {
+    content: "...";
+  }
 }
 
 .empty-lobby {
@@ -229,12 +240,6 @@
   box-sizing: border-box;
 
   border-bottom: 1px solid var(--panel-line, #626262);
-}
-
-.game-box-header > div {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
 }
 
 .game-box-header h2,
@@ -422,10 +427,6 @@
 
 @media (max-width: 500px) {
   #game {
-    grid-template-columns: 1fr;
-  }
-
-  #game {
     padding: 12px;
   }
 
@@ -447,13 +448,19 @@
     margin: -16px -16px 0;
     padding: 0 16px;
   }
-}
-
-@media (max-width: 500px) {
-  .game-title { padding-top: 40px; }
-  .empty-lobby p { padding: 16px; text-align: center; font-size: 16px; }
+  .game-title {
+    padding-top: 40px;
+  }
+  .empty-lobby p {
+    padding: 16px;
+    text-align: center;
+    font-size: 16px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .connecting-dots::after { animation: none; content: "..."; }
+  .connecting-dots::after {
+    animation: none;
+    content: "...";
+  }
 }

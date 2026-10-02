@@ -7,7 +7,7 @@
 }
 
 .theme-changing,
-.theme-changing * {
+.theme-changing *:not(.hamburger-menu):not(.hamburger-menu-backdrop) {
   transition: none !important;
   animation: none !important;
 }
@@ -80,18 +80,4 @@
 .theme-toggle input:focus-visible + .theme-slider {
   outline: 2px solid #e63946;
   outline-offset: 3px;
-}
-
-.light-theme .theme-toggle {
-  padding: 0;
-  background: transparent;
-  color: #000000;
-}
-
-.light-theme .theme-slider {
-  background: #444444;
-}
-
-.light-theme .theme-toggle input:checked + .theme-slider {
-  background: var(--accent);
 }

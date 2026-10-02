@@ -22,7 +22,9 @@
     4px 4px 0 var(--card-edge),
     7px 9px 16px rgb(0 0 0 / 32%);
   cursor: pointer;
-  transition: transform 180ms ease, box-shadow 180ms ease;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
 }
 
 .game-card:hover:not(:disabled),

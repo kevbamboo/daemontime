@@ -1,4 +1,5 @@
-#login-page {
+#login-page,
+#signup-page {
   min-height: 80vh;
   display: flex;
   justify-content: center;
@@ -8,7 +9,8 @@
   background: #0a0a0a;
 }
 
-.login-card {
+.login-card,
+#signup-form {
   box-sizing: border-box;
   width: 100%;
   max-width: 380px;
@@ -19,7 +21,8 @@
   border-radius: 4px;
 }
 
-.login-header {
+.login-header,
+.signup-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -49,7 +52,8 @@
   border-radius: 3px;
 }
 
-.login-header h1 {
+.login-header h1,
+.signup-header h1 {
   margin: 0 0 8px;
 
   color: #f5f5f5;
@@ -58,14 +62,16 @@
   letter-spacing: -0.8px;
 }
 
-.login-header p {
+.login-header p,
+.signup-header p {
   margin: 0;
 
   color: #888888;
   font-size: 15px;
 }
 
-#login-form > button[type="submit"] {
+#login-form > button[type="submit"],
+#signup-form > button[type="submit"] {
   width: 100%;
   height: 52px;
   margin-top: 8px;
@@ -86,11 +92,13 @@
     transform 0.1s ease;
 }
 
-#login-form > button[type="submit"]:hover {
+#login-form > button[type="submit"]:hover:not(:disabled),
+#signup-form > button[type="submit"]:hover:not(:disabled) {
   background: #c92f3b;
 }
 
-#login-form > button[type="submit"]:active {
+#login-form > button[type="submit"]:active:not(:disabled),
+#signup-form > button[type="submit"]:active:not(:disabled) {
   transform: translateY(1px);
 }
 
@@ -100,7 +108,8 @@
 }
 
 .forgot-password a,
-.signup-prompt a {
+.signup-prompt a,
+.signup-login a {
   display: inline-block;
   padding: 4px 8px;
   border: 1px solid transparent;
@@ -108,21 +117,25 @@
   color: #e63946;
   text-decoration: none;
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .forgot-password a:hover,
-.signup-prompt a:hover {
+.signup-prompt a:hover,
+.signup-login a:hover {
   background: #e6394620;
   border-color: #e6394680;
   text-decoration: underline;
 }
 
-.signup-prompt {
+.signup-prompt,
+.signup-login {
   margin-top: 28px;
 
   color: #777777;
   font-size: 14px;
   text-align: center;
 }
-

@@ -35,15 +35,28 @@
 }
 
 .hamburger-menu-backdrop {
+  display: none;
   position: fixed;
   inset: 0;
   z-index: 1100;
   background: rgb(0 0 0 / 15%);
   backdrop-filter: blur(2px);
   pointer-events: none;
+  opacity: 0;
+  transition:
+    opacity 240ms ease,
+    display 240ms allow-discrete;
+}
+
+.hamburger-menu-backdrop[data-open="true"] {
+  display: block;
+  opacity: 1;
 }
 
 .hamburger-menu {
+  display: none;
+  flex-direction: column;
+  gap: 28px;
   position: fixed;
   z-index: 1101;
   inset: 0 0 0 auto;
@@ -59,12 +72,26 @@
   background: var(--surface-background);
   color: var(--text-primary);
   overflow-y: auto;
+  transform: translateX(100%);
+  /* Keep the dialog visible until its closing slide finishes. */
+  transition:
+    transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    display 240ms allow-discrete;
 }
 
 .hamburger-menu[open] {
   display: flex;
-  flex-direction: column;
-  gap: 28px;
+  transform: translateX(0);
+}
+
+@starting-style {
+  .hamburger-menu[open] {
+    transform: translateX(100%);
+  }
+
+  .hamburger-menu-backdrop[data-open="true"] {
+    opacity: 0;
+  }
 }
 
 .hamburger-menu-header,
@@ -113,7 +140,9 @@
   opacity: 0.6;
 }
 
-html.symbol-cursor-active dialog.hamburger-menu,
-html.symbol-cursor-active dialog.hamburger-menu * {
-  cursor: auto !important;
+@media (prefers-reduced-motion: reduce) {
+  .hamburger-menu,
+  .hamburger-menu-backdrop {
+    transition: none;
+  }
 }

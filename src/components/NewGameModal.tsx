@@ -13,10 +13,10 @@ export default function NewGameModal({ onClose }: { onClose: () => void }) {
     return () => element.close();
   }, []);
 
-  async function submit(event: SubmitEvent) {
+  async function submit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     if (busy) return;
-    const form = event.currentTarget as HTMLFormElement;
+    const form = event.currentTarget;
     if (!form.reportValidity()) return;
     const data = new FormData(form);
     const timeLimit = Number(data.get("timeLimit"));

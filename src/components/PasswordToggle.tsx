@@ -1,11 +1,14 @@
-import { useState } from 'react';
+import { useState } from "react";
 
 type PasswordToggleProps = {
   visible: boolean;
   onToggle: () => void;
 };
 
-export default function PasswordToggle({ visible, onToggle }: PasswordToggleProps) {
+export default function PasswordToggle({
+  visible,
+  onToggle,
+}: PasswordToggleProps) {
   const [bouncing, setBouncing] = useState(false);
 
   function handleClick() {
@@ -17,10 +20,10 @@ export default function PasswordToggle({ visible, onToggle }: PasswordToggleProp
   return (
     <button
       type="button"
-      className={`password-toggle${bouncing ? ' is-bouncing' : ''}`}
+      className={`password-toggle${bouncing ? " is-bouncing" : ""}`}
       onClick={handleClick}
       onAnimationEnd={() => setBouncing(false)}
-      aria-label={visible ? 'Hide password' : 'Show password'}
+      aria-label={visible ? "Hide password" : "Show password"}
       aria-pressed={visible}
     >
       {visible ? (

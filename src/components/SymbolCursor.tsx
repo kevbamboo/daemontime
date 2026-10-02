@@ -4,11 +4,27 @@ import "./SymbolCursor.css";
 
 // Edit these settings to customize the cursor and its trail.
 const SYMBOL_CURSOR_SETTINGS = {
-  symbols: ["~", ".", ",", "<", ">", "?", "-", "+", "×", "÷", "%", "s", ":", ";"],
+  symbols: [
+    "~",
+    ".",
+    ",",
+    "<",
+    ">",
+    "?",
+    "-",
+    "+",
+    "×",
+    "÷",
+    "%",
+    "s",
+    ":",
+    ";",
+  ],
   changeIntervalMs: 50,
   trailDurationMs: 450,
   fallDistancePx: 28,
-  nativeCursorSelector: 'a[href], button, [role="button"], input, textarea, select, [role="slider"], [role="switch"], [role="textbox"], [contenteditable="true"], .theme-toggle, .game-card, .answer-choice',
+  nativeCursorSelector:
+    'a[href], button, [role="button"], input, textarea, select, [role="slider"], [role="switch"], [role="textbox"], [contenteditable="true"], dialog[open], .theme-toggle, .answer-choice',
 };
 
 export default function SymbolCursor() {
@@ -34,19 +50,37 @@ export default function SymbolCursor() {
       const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
       svg.classList.add("symbol-cursor-glyph");
       svg.setAttribute("viewBox", "0 0 24 24");
-      const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      const text = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "text",
+      );
       text.textContent = symbol;
       svg.appendChild(text);
       trails.appendChild(svg);
       const font = getComputedStyle(text);
       measurement.font = `${font.fontWeight} ${font.fontSize} ${font.fontFamily}`;
       const bounds = measurement.measureText(symbol);
-      text.setAttribute("x", String(12 + (bounds.actualBoundingBoxLeft - bounds.actualBoundingBoxRight) / 2));
-      text.setAttribute("y", String(12 + (bounds.actualBoundingBoxAscent - bounds.actualBoundingBoxDescent) / 2));
+      text.setAttribute(
+        "x",
+        String(
+          12 +
+            (bounds.actualBoundingBoxLeft - bounds.actualBoundingBoxRight) / 2,
+        ),
+      );
+      text.setAttribute(
+        "y",
+        String(
+          12 +
+            (bounds.actualBoundingBoxAscent - bounds.actualBoundingBoxDescent) /
+              2,
+        ),
+      );
       svg.remove();
       return svg;
     });
-    const mouseAvailable = window.matchMedia("(any-hover: hover) and (any-pointer: fine)");
+    const mouseAvailable = window.matchMedia(
+      "(any-hover: hover) and (any-pointer: fine)",
+    );
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     let current = Math.floor(Math.random() * symbols.length);
     let lastChange = 0;
@@ -83,11 +117,16 @@ export default function SymbolCursor() {
       trail.appendChild(glyphs[current].cloneNode(true));
       trail.style.left = `${x}px`;
       trail.style.top = `${y}px`;
-      trail.style.setProperty("--fall-distance", `${settings.fallDistancePx}px`);
+      trail.style.setProperty(
+        "--fall-distance",
+        `${settings.fallDistancePx}px`,
+      );
       trail.style.setProperty("--drift", `${(Math.random() - 0.5) * 20}px`);
       trail.style.setProperty("--rotation", `${(Math.random() - 0.5) * 40}deg`);
       trail.style.animationDuration = `${settings.trailDurationMs}ms`;
-      trail.addEventListener("animationend", () => trail.remove(), { once: true });
+      trail.addEventListener("animationend", () => trail.remove(), {
+        once: true,
+      });
       // Keep the trail bounded even if animations are paused by the browser.
       if (trails.childElementCount >= 24) trails.firstElementChild?.remove();
       trails.appendChild(trail);
@@ -95,11 +134,11 @@ export default function SymbolCursor() {
 
     const move = (event: PointerEvent) => {
       if (
-        event.pointerType !== "mouse"
-        || !mouseAvailable.matches
-        || document.documentElement.hasAttribute("data-native-cursor")
-        || (event.target instanceof Element
-          && event.target.closest(settings.nativeCursorSelector) !== null)
+        event.pointerType !== "mouse" ||
+        !mouseAvailable.matches ||
+        document.documentElement.hasAttribute("data-native-cursor") ||
+        (event.target instanceof Element &&
+          event.target.closest(settings.nativeCursorSelector) !== null)
       ) {
         hide();
         return;
@@ -113,7 +152,9 @@ export default function SymbolCursor() {
         dropSymbol();
         if (symbols.length > 1) {
           // Choose another symbol without repeating the current one.
-          current = (current + 1 + Math.floor(Math.random() * (symbols.length - 1))) % symbols.length;
+          current =
+            (current + 1 + Math.floor(Math.random() * (symbols.length - 1))) %
+            symbols.length;
         }
         cursor.replaceChildren(glyphs[current].cloneNode(true));
         lastChange = now;
@@ -140,8 +181,14 @@ export default function SymbolCursor() {
       attributeFilter: ["data-native-cursor"],
     });
 
-    window.addEventListener("pointermove", move, { capture: true, passive: true });
-    window.addEventListener("pointerover", move, { capture: true, passive: true });
+    window.addEventListener("pointermove", move, {
+      capture: true,
+      passive: true,
+    });
+    window.addEventListener("pointerover", move, {
+      capture: true,
+      passive: true,
+    });
     window.addEventListener("pointerout", leave);
     window.addEventListener("blur", hide);
     document.addEventListener("visibilitychange", visibilityChange);

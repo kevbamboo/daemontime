@@ -6,5 +6,7 @@ export default function Home({ authenticated }: { authenticated: boolean }) {
     <Suspense fallback={<p role="status">Loading lobby...</p>}>
       <GameBox />
     </Suspense>
-  ) : <AuthModal />;
+  ) : (
+    <AuthModal />
+  );
 }

@@ -9,9 +9,9 @@ type GameCardProps = {
 
 export default function GameCard({ game, disabled, onJoin }: GameCardProps) {
   const { started } = game;
-  const host = game.players.find(
-    (player) => player.id === game.hostId,
-  )?.username;
+  const host =
+    game.players.find((player) => player.id === game.hostId)?.username ??
+    "Unknown host";
   const unavailable = disabled || started;
 
   return (
@@ -20,7 +20,7 @@ export default function GameCard({ game, disabled, onJoin }: GameCardProps) {
       className="game-card"
       onClick={onJoin}
       disabled={unavailable}
-      aria-label={`${started ? "Game in progress" : "Join game"} hosted by ${host ?? "unknown"}, ${game.players.length} players, ${game.numberOfQuestions} questions, ${game.timeLimit} seconds per question`}
+      aria-label={`${started ? "Game in progress" : "Join game"} hosted by ${host}, ${game.players.length} players, ${game.numberOfQuestions} questions, ${game.timeLimit} seconds per question`}
     >
       <span className="game-card-front" aria-hidden="true">
         <span className="game-card-status">
@@ -34,7 +34,8 @@ export default function GameCard({ game, disabled, onJoin }: GameCardProps) {
             <strong>{host}</strong>
           </span>
           <span className="game-card-player-count">
-            {game.players.length} {game.players.length === 1 ? "player" : "players"}
+            {game.players.length}{" "}
+            {game.players.length === 1 ? "player" : "players"}
           </span>
         </span>
       </span>

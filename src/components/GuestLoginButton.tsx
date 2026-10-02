@@ -9,7 +9,11 @@ type GuestLoginButtonProps = {
   onBusyChange?: (busy: boolean) => void;
 };
 
-export default function GuestLoginButton({ variant = "button", disabled = false, onBusyChange }: GuestLoginButtonProps) {
+export default function GuestLoginButton({
+  variant = "button",
+  disabled = false,
+  onBusyChange,
+}: GuestLoginButtonProps) {
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");

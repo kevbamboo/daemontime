@@ -79,28 +79,28 @@ body.light-theme {
   position: absolute;
   right: 10px;
   top: 50%;
-  width: 32px !important;
-  height: 32px !important;
-  margin: 0 !important;
-  padding: 6px !important;
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  padding: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
   transform: translateY(-50%);
-  background: transparent !important;
+  background: transparent;
   color: #777777;
-  border: none !important;
+  border: none;
   border-radius: 3px;
   cursor: pointer;
 }
 
 .password-toggle:hover {
-  background: #1a1a1a !important;
+  background: #1a1a1a;
   color: #e63946;
 }
 
 .light-theme .password-toggle:hover {
-  background: transparent !important;
+  background: transparent;
   color: #000000;
 }
 .password-toggle.is-bouncing {
@@ -115,9 +115,16 @@ body.light-theme {
 }
 
 @keyframes password-toggle-bounce {
-  0%, 100% { transform: translateY(-50%); }
-  40% { transform: translateY(calc(-50% - 5px)); }
-  70% { transform: translateY(calc(-50% + 2px)); }
+  0%,
+  100% {
+    transform: translateY(-50%);
+  }
+  40% {
+    transform: translateY(calc(-50% - 5px));
+  }
+  70% {
+    transform: translateY(calc(-50% + 2px));
+  }
 }
 
 .light-theme,
@@ -151,10 +158,6 @@ body.light-theme {
 .light-theme .question-text,
 .light-theme .explanation,
 .light-theme .game-timer {
-  color: #000000;
-}
-
-.light-theme .game-title {
   color: #000000;
 }
 
@@ -268,13 +271,6 @@ body.light-theme {
   color: #000000;
 }
 
-.light-theme .new-game-modal input {
-  background: #fffaf0;
-  color: #000000;
-  border-color: #000000;
-}
-
-.light-theme .new-game-modal-actions button,
 .light-theme .new-game-actions button[type="button"] {
   background: #fffaf0;
   color: #000000;
@@ -422,11 +418,15 @@ body.light-theme {
   }
 }
 
-button:disabled { cursor: not-allowed; }
+button:disabled {
+  cursor: not-allowed;
+}
 
 .auth-options button:disabled,
 #login-form > button:disabled,
-#signup-form > button:disabled { opacity: 0.6; }
+#signup-form > button:disabled {
+  opacity: 0.6;
+}
 
 .app-shell a:focus-visible,
 .app-shell button:focus-visible {
@@ -434,14 +434,25 @@ button:disabled { cursor: not-allowed; }
   outline-offset: 3px;
 }
 
-.app-shell #login-page, .app-shell #signup-page {
+.app-shell #login-page,
+.app-shell #signup-page {
   box-sizing: border-box;
   min-height: 100dvh;
   padding-top: 64px;
 }
 
 @media (max-width: 500px) {
-  .app-shell .login-card, .app-shell #signup-form, .app-shell .modal-card { padding: 24px; }
-  .app-shell .login-header, .app-shell .signup-header { gap: 12px; }
-  .app-shell .login-header h1, .app-shell .signup-header h1 { font-size: 25px; }
+  .app-shell .login-card,
+  .app-shell #signup-form,
+  .app-shell .modal-card {
+    padding: 24px;
+  }
+  .app-shell .login-header,
+  .app-shell .signup-header {
+    gap: 12px;
+  }
+  .app-shell .login-header h1,
+  .app-shell .signup-header h1 {
+    font-size: 25px;
+  }
 }
